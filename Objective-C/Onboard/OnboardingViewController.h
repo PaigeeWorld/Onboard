@@ -15,6 +15,8 @@
 // View controllers and background image
 @property (nonatomic, strong) NSArray *viewControllers;
 @property (nonatomic, strong) UIImage *backgroundImage;
+@property (nonatomic, strong) UIImageView *backgroundImageView;
+
 
 // Masking, blurring, fading, etc.
 @property (nonatomic) BOOL shouldMaskBackground;
@@ -32,6 +34,7 @@
 // Page Control
 @property (nonatomic) BOOL hidePageControl;
 @property (nonatomic, strong) UIPageControl *pageControl;
+@property (nonatomic) CGFloat pageControlBottomPadding;
 
 // Skip Button
 @property (nonatomic, strong) UIButton *skipButton;

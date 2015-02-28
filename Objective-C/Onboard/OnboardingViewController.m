@@ -16,6 +16,8 @@ static CGFloat const kSkipButtonHeight = 44;
 static CGFloat const kBackgroundMaskAlpha = 0.6;
 static CGFloat const kDefaultBlurRadius = 20;
 static CGFloat const kDefaultSaturationDeltaFactor = 1.8;
+static CGFloat const kDefaultPageControlPadding = 70;
+
 
 static NSString * const kSkipButtonText = @"Skip";
 
@@ -27,6 +29,7 @@ static NSString * const kSkipButtonText = @"Skip";
     OnboardingContentViewController *_upcomingPage;
 }
 
+@synthesize backgroundImageView;
 
 #pragma mark - Initializing with images
 
@@ -80,6 +83,7 @@ static NSString * const kSkipButtonText = @"Skip";
     
     self.allowSkipping = NO;
     self.skipHandler = ^{};
+    self.pageControlBottomPadding = kDefaultPageControlPadding;
     
     // create the initial exposed components so they can be customized
     self.pageControl = [UIPageControl new];
@@ -106,7 +110,7 @@ static NSString * const kSkipButtonText = @"Skip";
 
 - (void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
-    
+    [self.navigationController setNavigationBarHidden:YES];
     // if we have a video URL, start playing
     if (_videoURL) {
         [self.moviePlayerController play];
@@ -125,7 +129,6 @@ static NSString * const kSkipButtonText = @"Skip";
         [self blurBackground];
     }
     
-    UIImageView *backgroundImageView;
     
     // create the background image view and set it to aspect fill so it isn't skewed
     if (self.backgroundImage) {
@@ -174,7 +177,7 @@ static NSString * const kSkipButtonText = @"Skip";
     
     // create and configure the the page control
     if (!self.hidePageControl) {
-        self.pageControl.frame = CGRectMake(0, CGRectGetMaxY(self.view.frame) - kPageControlHeight, self.view.frame.size.width, kPageControlHeight);
+        self.pageControl.frame = CGRectMake(0, CGRectGetMaxY(self.view.frame) - kPageControlHeight - self.pageControlBottomPadding, self.view.frame.size.width, kPageControlHeight);
         self.pageControl.numberOfPages = self.viewControllers.count;
         self.pageControl.userInteractionEnabled = NO;
         [self.view addSubview:self.pageControl];
@@ -362,10 +365,18 @@ static NSString * const kSkipButtonText = @"Skip";
     if (!completed) {
         return;
     }
-    
     // get the view controller we are moving towards, then get the index, then set it as the current page
     // for the page control dots
-    UIViewController *viewController = [pageViewController.viewControllers lastObject];
+    OnboardingContentViewController *viewController = (OnboardingContentViewController*)[pageViewController.viewControllers lastObject];
+    if (viewController.backgroundImage) {
+        self.backgroundImage = viewController.backgroundImage;
+        // create the background image view and set it to aspect fill so it isn't skewed
+        if (self.backgroundImage) {
+            [UIView transitionWithView:backgroundImageView duration:0.5f options:UIViewAnimationOptionTransitionCrossDissolve animations:^{
+                [backgroundImageView setImage:self.backgroundImage];
+            } completion:nil];
+        }
+    }
     NSInteger newIndex = [self.viewControllers indexOfObject:viewController];
     [self.pageControl setCurrentPage:newIndex];
 }
