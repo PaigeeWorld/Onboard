@@ -8,6 +8,10 @@
 
 #import "OnboardingViewController.h"
 #import "OnboardingContentViewController.h"
+
+#define Onis8() ([[[UIDevice currentDevice] systemVersion] floatValue] >= 8)
+#define OnIsIpad() ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad)
+
 @import Accelerate;
 
 static CGFloat const kPageControlHeight = 35;
@@ -120,6 +124,15 @@ static NSString * const kSkipButtonText = @"Skip";
 - (void)generateView {
     // create our page view controller
     _pageVC = [[UIPageViewController alloc] initWithTransitionStyle:UIPageViewControllerTransitionStyleScroll navigationOrientation:UIPageViewControllerNavigationOrientationHorizontal options:nil];
+    
+    CGRect frame = self.view.frame;
+    if (OnIsIpad() && !Onis8()) {
+        float width = frame.size.width;
+        frame.size.width = frame.size.height;
+        frame.size.height = width;
+        self.view.frame = frame;
+    }
+    
     _pageVC.view.frame = self.view.frame;
     _pageVC.view.backgroundColor = [UIColor whiteColor];
     _pageVC.delegate = self;
@@ -132,6 +145,13 @@ static NSString * const kSkipButtonText = @"Skip";
     
     // create the background image view and set it to aspect fill so it isn't skewed
     if (self.backgroundImage) {
+        CGRect bounds = self.view.bounds;
+        if (OnIsIpad() && !Onis8()) {
+            float width = bounds.size.width;
+            bounds.size.width = bounds.size.height;
+            bounds.size.height = width;
+        }
+        
         backgroundImageView = [[UIImageView alloc] initWithFrame:self.view.bounds];
         backgroundImageView.contentMode = UIViewContentModeScaleAspectFill;
         [backgroundImageView setImage:self.backgroundImage];
@@ -178,6 +198,7 @@ static NSString * const kSkipButtonText = @"Skip";
     // create and configure the the page control
     if (!self.hidePageControl) {
         self.pageControl.frame = CGRectMake(0, CGRectGetMaxY(self.view.frame) - kPageControlHeight - self.pageControlBottomPadding, self.view.frame.size.width, kPageControlHeight);
+        NSLog(@"the frame %@",NSStringFromCGRect(self.pageControl.frame));
         self.pageControl.numberOfPages = self.viewControllers.count;
         self.pageControl.userInteractionEnabled = NO;
         [self.view addSubview:self.pageControl];
@@ -404,7 +425,8 @@ static NSString * const kSkipButtonText = @"Skip";
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView {
     // calculate the percent complete of the transition of the current page given the
     // scrollview's offset and the width of the screen
-    CGFloat percentComplete = fabs(scrollView.contentOffset.x - self.view.frame.size.width) / self.view.frame.size.width;
+    float width = self.view.frame.size.width;
+    CGFloat percentComplete = fabs(scrollView.contentOffset.x - width) / width;
     
     // these cases have some funk results given the way this method is called, like stuff
     // just disappearing, so we want to do nothing in these cases

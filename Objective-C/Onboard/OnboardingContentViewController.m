@@ -9,6 +9,10 @@
 #import "OnboardingContentViewController.h"
 #import "OnboardingViewController.h"
 
+#define PWis8() ([[[UIDevice currentDevice] systemVersion] floatValue] >= 8)
+
+#define PSIsIpad() ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad)
+
 static NSString * const kDefaultOnboardingFont = @"Helvetica-Light";
 
 #define DEFAULT_TEXT_COLOR [UIColor whiteColor];
@@ -54,14 +58,14 @@ static CGFloat const kMainPageControlHeight = 35;
     
     // default icon properties
     if(_image) {
-		self.iconHeight = _image.size.height;
-		self.iconWidth = _image.size.width;
-	}
+        self.iconHeight = _image.size.height;
+        self.iconWidth = _image.size.width;
+    }
     
     else {
-		self.iconHeight = kDefaultImageViewSize;
-		self.iconWidth = kDefaultImageViewSize;
-	}
+        self.iconHeight = kDefaultImageViewSize;
+        self.iconWidth = kDefaultImageViewSize;
+    }
     
     // default title properties
     self.titleFontName = kDefaultOnboardingFont;
@@ -133,7 +137,9 @@ static CGFloat const kMainPageControlHeight = 35;
     // do some calculation for some common values we'll need, namely the width of the view,
     // the center of the width, and the content width we want to fill up, which is some
     // fraction of the view width we set in the multipler constant
-    CGFloat viewWidth = CGRectGetWidth(self.view.frame);
+    CGFloat viewWidth = (PSIsIpad() && !PWis8()) ? CGRectGetHeight(self.view.frame) : CGRectGetWidth(self.view.frame);
+    NSLog(@"view width %f",viewWidth);
+    
     CGFloat horizontalCenter = viewWidth / 2;
     CGFloat contentWidth = viewWidth * kContentWidthMultiplier;
     
